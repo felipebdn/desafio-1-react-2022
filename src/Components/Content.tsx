@@ -1,24 +1,56 @@
-import { ClipboardText, PlusCircle } from "phosphor-react"
+import { PlusCircle } from "phosphor-react"
 import { ChangeEvent, FormEvent, useState } from "react"
+import { NoTask } from "./NoTask";
 import { Task } from "./Task";
 
+interface task {
+  id: number
+  title: string
+  isComplet: boolean
+}
+
 export function Content() {
-  const [tasks, setTask] = useState([
-    'post mt bacana'
-  ]);
+
+  const [tasks, setTask] = useState<task[]>([]);
 
   const [ newTaskText, setNewTaskText ] = useState('')
 
   function handleCreateNewTask(event: FormEvent) {
     event?.preventDefault();
 
-    setTask([...tasks, newTaskText])
+    const task:task = {
+      id: Math.floor(Math.random() * 10),
+      title: newTaskText,
+      isComplet: false
+    }
+
+    setTask([...tasks, task])
+    setNewTaskText('')
   }
 
   function handleNewTaskChange(event: ChangeEvent<HTMLInputElement>) {
     event.target.setCustomValidity('')
     setNewTaskText(event.target.value)
   }
+
+  function deleteTask(deleteTaskId: number,deleteTaskTitle: string){
+    const tasksWithoutDeleteOne = tasks.filter(task => {
+      return task.id !== deleteTaskId && task.title !== deleteTaskTitle
+    })
+    setTask(tasksWithoutDeleteOne)
+  }
+
+  function changeCompletedTask(changeCompletedTask: boolean, changeIdTask: number) {
+    const taskModifiedStatus = tasks.map(task => {
+      if(task.id === changeIdTask && task.isComplet === changeCompletedTask){
+        task.isComplet = true
+      }
+    })
+    
+    setTask(taskModifiedStatus)
+  }
+
+  const isNewTaskEmpty = newTaskText.length === 0
 
   return (
     <div className="flex justify-center ">
@@ -27,12 +59,14 @@ export function Content() {
           <input
             className="box-border w-full font-inter p-3 font-normal text-base text-person-300 rounded-lg bg-person-500 border-solid border-[1px] border-person-700"
             type="text"
+            value={newTaskText}
             onChange={handleNewTaskChange}
             name="newtask"
             id="newtask"
             placeholder="Adicione uma nova tarefa"
           />
-          <button
+          <button 
+            disabled={isNewTaskEmpty}
             className="flex bg-blueDark rounded-lg p-4 gap-2 font-inter font-bold text-person-100 justify-center items-center text-sm"
           >
             Criar
@@ -61,20 +95,18 @@ export function Content() {
           </div>
 
           {tasks.length == 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 border-t rounded-lg border-person-400 font-inter">
-              <div className="flex flex-col items-center justify-center text-person-300 text-base">
-                <ClipboardText size={56} weight="thin" />
-                <p className="font-bold mt-4">
-                  Você ainda não tem tarefas cadastradas
-                </p>
-                <p className="">Crie tarefas e organize seus itens a fazer</p>
-              </div>
-            </div>
+            <NoTask />
           ) : (
             <div className="flex flex-col gap-3">
-              {tasks.map(taskss => {                
+              {tasks.map(taskss => {
                 return (
-                  <Task content={taskss}/>
+                  <Task
+                    id={taskss.id}
+                    title={taskss.title}
+                    isCompleted={taskss.isComplet}
+                    onCompletedTask={changeCompletedTask}
+                    onDeleteTask={deleteTask}
+                  />
                 )
               })}
             </div>

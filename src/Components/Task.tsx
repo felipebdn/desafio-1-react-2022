@@ -1,51 +1,68 @@
 import { Trash } from "phosphor-react";
 
 interface tasksProps {
-  content: string
+  id: number;
+  title: string;
+  isCompleted:boolean;
+  onCompletedTask: (isCompleted: boolean, changeIdTask: number) => void;
+  onDeleteTask: (task: number, title: string) => void;
 }
 
-export function Task({content}:tasksProps) {
+export function Task({ id, title, isCompleted, onDeleteTask, onCompletedTask }: tasksProps) {
+  function handleDeleteTask() {
+    onDeleteTask(id, title);
+  }
+
+  function changeIsCompleted() {
+    onCompletedTask(isCompleted, id)
+  }
+
   return (
-    <div className="flex p-4 gap-3 items-start bg-person-500 border border-person-400 rounded-lg">
+    <div
+      key={id}
+      className="flex p-4 gap-3 items-start bg-person-500 border border-person-400 rounded-lg"
+    >
       <input
         id="checkbox-task"
         type="checkbox"
+        onChange={changeIsCompleted}
         className="
-              peer
-              flex
-              appearance-none
-              w-5
-              h-5
-              border-2
-              border-blue
-              rounded-full
-              hover:border-blueDark
-              hover:bg-blueDark
-              hover:bg-opacity-20
-              checked:border-none
-              checked:bg-purpleDark
-              focus:outline-none
-              checked:hover:bg-purple
-            "
+          peer
+          flex
+          appearance-none
+          w-5
+          h-5
+          border-2
+          border-blue
+          rounded-full
+          hover:border-blueDark
+          hover:bg-blueDark
+          hover:bg-opacity-20
+          checked:border-none
+          checked:bg-purpleDark
+          focus:outline-none
+          checked:hover:bg-purple
+        "
       />
 
       <label
         htmlFor="checkbox-task"
         className="
-            flex
-            font-inter
-            text-sm
-            font-normal
-            text-person-100
-            peer-checked:line-through
-            peer-checked:text-person-300
-            cursor-pointer
-            w-full
-          "
+          flex
+          font-inter
+          text-sm
+          font-normal
+          text-person-100
+          peer-checked:line-through
+          peer-checked:text-person-300
+          cursor-pointer
+          w-full
+        "
       >
-        {content}
+        {title}
       </label>
       <a
+        onClick={handleDeleteTask}
         href="#"
         className="flex rounded-[4px] text-person-300 p-1 hover:bg-person-400 hover:text-danger"
       >
