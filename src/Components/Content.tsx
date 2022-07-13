@@ -1,56 +1,73 @@
-import { PlusCircle } from "phosphor-react"
-import { ChangeEvent, FormEvent, useState } from "react"
+import { v4 as uuidv4 } from "uuid";
+import { PlusCircle } from "phosphor-react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { NoTask } from "./NoTask";
 import { Task } from "./Task";
 
 interface task {
-  id: number
-  title: string
-  isComplet: boolean
+  id: string;
+  title: string;
+  isComplet: boolean;
 }
 
 export function Content() {
-
   const [tasks, setTask] = useState<task[]>([]);
-
-  const [ newTaskText, setNewTaskText ] = useState('')
+  const [newTaskText, setNewTaskText] = useState("");
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [totalToDo, setTotalToDo] = useState(0);
 
   function handleCreateNewTask(event: FormEvent) {
     event?.preventDefault();
 
-    const task:task = {
-      id: Math.floor(Math.random() * 10),
+    const task: task = {
+      id: uuidv4(),
       title: newTaskText,
-      isComplet: false
-    }
+      isComplet: false,
+    };
 
-    setTask([...tasks, task])
-    setNewTaskText('')
+    setTask([...tasks, task]);
+    setNewTaskText("");
+    setTotalTasks(tasks.length + 1);
+    handleTotalToDo(0);
   }
 
   function handleNewTaskChange(event: ChangeEvent<HTMLInputElement>) {
-    event.target.setCustomValidity('')
+    event.target.setCustomValidity("")
     setNewTaskText(event.target.value)
   }
 
-  function deleteTask(deleteTaskId: number,deleteTaskTitle: string){
-    const tasksWithoutDeleteOne = tasks.filter(task => {
-      return task.id !== deleteTaskId && task.title !== deleteTaskTitle
-    })
+  function deleteTask(deleteTaskId: string) {
+    const tasksWithoutDeleteOne = tasks.filter((task) => {
+      
+      return task.id !== deleteTaskId
+    });
     setTask(tasksWithoutDeleteOne)
+    setTotalTasks(tasks.length - 1)
+    if(totalToDo === 0){
+      handleTotalToDo(0)
+    }else{      
+      handleTotalToDo(-1)
+    }
   }
 
-  function changeCompletedTask(changeCompletedTask: boolean, changeIdTask: number) {
-    const taskModifiedStatus = tasks.map(task => {
-      if(task.id === changeIdTask && task.isComplet === changeCompletedTask){
-        task.isComplet = true
-      }
-    })
-    
-    setTask(taskModifiedStatus)
+  function handleToggleTaskCompletion(id: string) {
+    const taskIndex = tasks.findIndex((task) => {
+      return task.id === id
+    });
+    const tempTasks = [...tasks]
+    tempTasks[taskIndex].isComplet = !tempTasks[taskIndex].isComplet;
+    handleTotalToDo(0);
+    setTask(tempTasks);
   }
 
-  const isNewTaskEmpty = newTaskText.length === 0
+  function handleTotalToDo(num: number) {
+    const sum = tasks.filter((task) => {
+      return task.isComplet === true;
+    });
+    setTotalToDo(sum.length + num);
+  }
+
+  const isNewTaskEmpty = newTaskText.length === 0;
 
   return (
     <div className="flex justify-center ">
@@ -65,7 +82,7 @@ export function Content() {
             id="newtask"
             placeholder="Adicione uma nova tarefa"
           />
-          <button 
+          <button
             disabled={isNewTaskEmpty}
             className="flex bg-blueDark rounded-lg p-4 gap-2 font-inter font-bold text-person-100 justify-center items-center text-sm"
           >
@@ -81,7 +98,7 @@ export function Content() {
                 Tarefas criadas
               </p>
               <span className="flex flex-col justify-center items-center  text-person-200 font-inter font-bold rounded-full text-xs bg-person-400 py-1 px-2.5">
-                5
+                {totalTasks}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -89,7 +106,7 @@ export function Content() {
                 Cuncluídas
               </p>
               <span className="flex flex-col justify-center items-center  text-person-200 font-inter font-bold rounded-full text-xs bg-person-400 py-1 px-2.5">
-                2 de 5
+                {totalToDo} de {totalTasks}
               </span>
             </div>
           </div>
@@ -98,16 +115,16 @@ export function Content() {
             <NoTask />
           ) : (
             <div className="flex flex-col gap-3">
-              {tasks.map(taskss => {
+              {tasks.map((taskss) => {
                 return (
                   <Task
                     id={taskss.id}
                     title={taskss.title}
                     isCompleted={taskss.isComplet}
-                    onCompletedTask={changeCompletedTask}
+                    onCompletedTask={handleToggleTaskCompletion}
                     onDeleteTask={deleteTask}
                   />
-                )
+                );
               })}
             </div>
           )}

@@ -1,20 +1,20 @@
 import { Trash } from "phosphor-react";
 
 interface tasksProps {
-  id: number;
+  id: string;
   title: string;
   isCompleted:boolean;
-  onCompletedTask: (isCompleted: boolean, changeIdTask: number) => void;
-  onDeleteTask: (task: number, title: string) => void;
+  onCompletedTask: (changeIdTask: string) => void;
+  onDeleteTask: (task: string) => void;
 }
 
 export function Task({ id, title, isCompleted, onDeleteTask, onCompletedTask }: tasksProps) {
   function handleDeleteTask() {
-    onDeleteTask(id, title);
+    onDeleteTask(id);
   }
 
   function changeIsCompleted() {
-    onCompletedTask(isCompleted, id)
+    onCompletedTask(id)
   }
 
   return (
@@ -25,7 +25,8 @@ export function Task({ id, title, isCompleted, onDeleteTask, onCompletedTask }: 
       <input
         id="checkbox-task"
         type="checkbox"
-        onChange={changeIsCompleted}
+        checked={isCompleted}
+        onClick={changeIsCompleted}
         className="
           peer
           flex
